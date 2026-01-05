@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAR - Mișcarea Acționarilor Români | Site Oficial</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <style>
+        /* --- VARIABILE ȘI RESET --- */
+        :root {
+            --navy: #0f172a;
+            --blue: #1e293b;
+            --gold: #d4af37;
+            --green: #10b981;
+            --white: #ffffff;
+            --light-gray: #f8fafc;
+            --text-main: #334155;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--navy);
+            color: var(--white);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo span { color: var(--gold); }
+
+        nav ul { display: flex; gap: 20px; }
+        nav a { font-weight: 500; transition: color 0.3s; cursor: pointer; }
+        nav a:hover { color: var(--gold); }
+        .btn-nav { background: var(--gold); color: var(--navy); padding: 8px 16px; border-radius: 4px; font-weight: bold; }
+
+        /* --- HERO --- */
+        .hero {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 100px 20px 50px;
+        }
+
+        .hero h1 { font-size: 3.5rem; margin-bottom: 20px; line-height: 1.1; }
+        .hero h1 span { color: var(--gold); display: block; }
+        .hero p { font-size: 1.3rem; max-width: 700px; margin-bottom: 40px; opacity: 0.9; }
+
+        .cta-buttons { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+        .btn-primary { background-color: var(--green); color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+        .btn-secondary { background-color: transparent; border: 2px solid var(--white); color: var(--white); }
+        .btn:hover { transform: translateY(-2px); }
+
+        /* --- SECTIUNI GENERALE --- */
+        .section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2.5rem; color: var(--navy); margin-bottom: 50px; }
+
+        /* --- CARDS DOCTRINA --- */
+        .doctrine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .card { background: var(--white); padding: 30px; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); border-top: 4px solid var(--navy); transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-icon { font-size: 2.5rem; margin-bottom: 20px; display: block; }
+
+        /* --- CALCULATOR --- */
+        .calculator-section { background-color: var(--white); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 50px; margin: 80px auto; }
+        .calc-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .calc-input label { display: block; margin-bottom: 10px; font-weight: bold; color: var(--navy); }
+        .calc-input input { width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1.1rem; margin-bottom: 20px; }
+        .result-display { background: var(--light-gray); padding: 30px; border-radius: 15px; border-left: 5px solid var(--green); opacity: 0.5; transition: opacity 0.5s; }
+        .res-val { font-size: 2rem; font-weight: 800; color: var(--navy); }
+
+        /* --- SONDAJ (POLL) --- */
+        .poll-section {
+            background: white;
+            padding: 60px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .poll-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 40px;
+            border: 1px solid #cbd5e1;
+        }
+        .poll-question { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: var(--navy); }
+        .poll-options { display: grid; gap: 10px; margin-bottom: 30px; }
+        .poll-option {
+            background: white; padding: 15px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .poll-option:hover { border-color: var(--navy); }
+        .poll-option input { width: 20px; height: 20px; accent-color: var(--green); }
+        
+        .live-counter {
+            text-align: center; margin-bottom: 40px;
+            font-size: 1.1rem; color: var(--navy);
+        }
+        .counter-number { font-size: 2.5rem; font-weight: 800; color: var(--green); display: block; }
+
+        .poll-results-msg {
+            display: none;
+            background: #dcfce7;
+            color: #166534;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        /* --- ADEZIUNE --- */
+        .join-section { background: var(--navy); color: var(--white); padding: 80px 20px; text-align: center; }
+        .join-form { max-width: 500px; margin: 40px auto; text-align: left; }
+        .join-form input, .join-form select { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 5px; font-family: inherit; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; }
+        .checkbox-group input { width: auto; margin-top: 5px; }
+
+        /* FOOTER */
+        footer { background: #020617; color: #94a3b8; padding: 50px 20px; text-align: center; font-size: 0.9rem; }
+
+        /* ANIMATII */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .calc-wrapper { grid-template-columns: 1fr; }
+            nav ul { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">MAR <span>.ro</span></div>
+        <nav>
+            <ul>
+                <li><a href="#viziune">Viziune</a></li>
+                <li><a href="#calculator">Simulator</a></li>
+                <li><a href="#sondaj">Sondaj</a></li>
+                <li><a href="#adeziune" class="btn-nav">Înscrie-te</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Nu ești doar contribuabil.<br><span>Ești Acționar.</span></h1>
+        <p>Primul partid din România care propune trecerea de la „Statul Stăpân” la „Statul Partener”. Dividende din resurse, nu pomeni electorale.</p>
+        <div class="cta-buttons">
+            <button class="btn btn-primary" onclick="document.getElementById('calculator').scrollIntoView({behavior: 'smooth'})">Vezi câți bani primești</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('sondaj').scrollIntoView({behavior: 'smooth'})">Votează în Sondaj</button>
+        </div>
+    </section>
+
+    <section id="viziune" class="section">
+        <h2 class="section-title">Pilonii Mișcării Acționarilor Români</h2>
+        <div class="doctrine-grid">
+            <div class="card">
+                <span class="card-icon">🔐</span>
+                <h3>Fondul Suveran Garantat</h3>
+                <p>Constituirea Fondului Național de Avere (model Norvegia). Resursele naturale generează profit direct în conturile cetățenilor.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">📉</span>
+                <h3>Taxe Mici prin Colectare</h3>
+                <p>Eliminarea evaziunii fiscale prin AI și digitalizare. Surplusul colectat scade taxele pe salariul tău.</p>
+            </div>
+            <div class="card">
+                <span class="card-icon">🏛️</span>
+                <h3>Statul Digital Invizibil</h3>
+                <p>Zero dosare cu șină. Relația cu statul devine o simplă aplicație pe telefon. Transparență totală prin Blockchain.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="calculator" class="section">
+        <div class="calculator-section">
+            <h2 class="section-title">Simulatorul Tău de Avere</h2>
+            <div class="calc-wrapper">
+                <div class="calc-input">
+                    <label>Salariul tău NET actual (Lei)</label>
+                    <input type="number" id="salary" placeholder="Ex: 4000">
+                    <label>Vârsta ta (Ani)</label>
+                    <input type="number" id="age" placeholder="Ex: 35">
+                    <button class="btn btn-primary" style="width: 100%" onclick="calculateMAR()">Calculează Viitorul</button>
+                </div>
+                <div class="result-display" id="results">
+                    <div style="margin-bottom: 20px;">
+                        <div style="text-transform: uppercase; font-size: 0.8rem; color: #64748b; font-weight: 700;">Câștig Lunar Imediat</div>
+                        <div class="res-val" style="color: var(--green);">+ <span id="monthly-gain">0</span> Lei</div>
+                        <small>Din reducerea taxelor pe muncă.</small>
+                    </div>
+                    <div>
+                        <div style="text-transform: uppercase; font-size: 0.8rem; color: #64748b; font-weight: 700;">Cont Avere la 65 ani</div>
+                        <div class="res-val">+ <span id="fund-value">0</span> Euro</div>
+                        <small>Acumulați în Fondul Suveran.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sondaj" class="poll-section">
+        <h2 class="section-title">Pulsul Național</h2>
+        
+        <div class="live-counter">
+            Susținători înregistrați online în timp real:
+            <span class="counter-number" id="supporterCounter">12483</span>
+        </div>
+
+        <div class="poll-container">
+            <form id="pollForm" onsubmit="submitPoll(event)">
+                <div class="poll-question">1. Crezi că resursele naturale (Aur, Gaz) ar trebui să aducă bani direct în conturile românilor?</div>
+                <div class="poll-options">
+                    <label class="poll-option"><input type="radio" name="q1" value="da" required> DA, este dreptul nostru.</label>
+                    <label class="poll-option"><input type="radio" name="q1" value="nu"> NU, statul trebuie să gestioneze tot.</label>
+                </div>
+
+                <div class="poll-question">2. Dacă MAR ar garanta Fondul Suveran prin audit Norvegian, ai semna pentru înființare?</div>
+                <div class="poll-options">
+                    <label class="poll-option"><input type="radio" name="q2" value="sigur" required> DA, semnez imediat.</label>
+                    <label class="poll-option"><input type="radio" name="q2" value="poate"> Poate, vreau să văd echipa.</label>
+                    <label class="poll-option"><input type="radio" name="q2" value="nu"> Nu mă interesează.</label>
+                </div>
+
+                <div class="poll-question">3. Din ce județ votezi?</div>
+                <div class="poll-options">
+                    <select id="pollCounty" style="width: 100%; padding: 15px; border-radius: 8px; border: 2px solid #e2e8f0;" required>
+                        <option value="" disabled selected>Alege Județul...</option>
+                        <option value="Alba">Alba</option>
+                        <option value="Arad">Arad</option>
+                        <option value="Argeș">Argeș</option>
+                        <option value="Bacău">Bacău</option>
+                        <option value="Bihor">Bihor</option>
+                        <option value="Bistrița-Năsăud">Bistrița-Năsăud</option>
+                        <option value="Botoșani">Botoșani</option>
+                        <option value="Brașov">Brașov</option>
+                        <option value="Brăila">Brăila</option>
+                        <option value="București">București</option>
+                        <option value="Buzău">Buzău</option>
+                        <option value="Caraș-Severin">Caraș-Severin</option>
+                        <option value="Călărași">Călărași</option>
+                        <option value="Cluj">Cluj</option>
+                        <option value="Constanța">Constanța</option>
+                        <option value="Covasna">Covasna</option>
+                        <option value="Dâmbovița">Dâmbovița</option>
+                        <option value="Dolj">Dolj</option>
+                        <option value="Galați">Galați</option>
+                        <option value="Giurgiu">Giurgiu</option>
+                        <option value="Gorj">Gorj</option>
+                        <option value="Harghita">Harghita</option>
+                        <option value="Hunedoara">Hunedoara</option>
+                        <option value="Ialomița">Ialomița</option>
+                        <option value="Iași">Iași</option>
+                        <option value="Ilfov">Ilfov</option>
+                        <option value="Maramureș">Maramureș</option>
+                        <option value="Mehedinți">Mehedinți</option>
+                        <option value="Mureș">Mureș</option>
+                        <option value="Neamț">Neamț</option>
+                        <option value="Olt">Olt</option>
+                        <option value="Prahova">Prahova</option>
+                        <option value="Satu Mare">Satu Mare</option>
+                        <option value="Sălaj">Sălaj</option>
+                        <option value="Sibiu">Sibiu</option>
+                        <option value="Suceava">Suceava</option>
+                        <option value="Teleorman">Teleorman</option>
+                        <option value="Timiș">Timiș</option>
+                        <option value="Tulcea">Tulcea</option>
+                        <option value="Vaslui">Vaslui</option>
+                        <option value="Vâlcea">Vâlcea</option>
+                        <option value="Vrancea">Vrancea</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Trimite Votul Tău</button>
+            </form>
+
+            <div id="pollSuccess" class="poll-results-msg">
+                ✅ Vot Înregistrat! <br>
+                Mulțumim. Ești susținătorul numărul <span id="userRank">1405</span> din județul <span id="userCounty">București</span>.<br>
+                <span style="font-size: 0.9rem; font-weight: normal; color: #333;">Împreună suntem o forță. Completează formularul de mai jos pentru a deveni membru.</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="adeziune" class="join-section">
+        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Fii Membru Fondator</h2>
+        <p style="max-width: 600px; margin: 0 auto; opacity: 0.8;">Nu căutăm politicieni. Căutăm profesioniști, antreprenori și cetățeni. Alătură-te mișcării.</p>
+
+        <form class="join-form" onsubmit="alert('Cerere trimisă! Vă vom contacta.'); return false;">
+            <input type="text" placeholder="Nume Complet" required>
+            <input type="email" placeholder="Adresa de Email" required>
+            <input type="tel" placeholder="Număr de Telefon" required>
+            <div class="checkbox-group">
+                <input type="checkbox" id="agreement" required>
+                <label for="agreement">Sunt de acord cu Doctrina MAR și declar că susțin statul de drept.</label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; background: var(--gold); color: var(--navy);">Trimite Adeziunea</button>
+        </form>
+    </section>
+
+    <footer>
+        <div class="logo" style="justify-content: center; margin-bottom: 20px;">MAR <span>.ro</span></div>
+        <p>&copy; 2026 Mișcarea Acționarilor Români.</p>
+        <p style="font-size: 0.8rem; opacity: 0.5;">Disclaimer: Proiecțiile economice sunt estimative.</p>
+    </footer>
+
+    <script>
+        // 1. CALCULATOR LOGIC
+        function calculateMAR() {
+            const salary = parseFloat(document.getElementById('salary').value);
+            const age = parseInt(document.getElementById('age').value);
+            const resDiv = document.getElementById('results');
+
+            if(!salary || !age) { alert("Introdu salariul și vârsta."); return; }
+
+            const immediateGain = Math.round(salary * 0.17);
+            const monthlyContribEuro = 60 + ((salary * 0.03) / 5); 
+            const years = 65 - age;
+            let wealth = 0;
+            if (years > 0) {
+                const months = years * 12;
+                const rate = 0.06 / 12; 
+                wealth = monthlyContribEuro * ((Math.pow(1 + rate, months) - 1) / rate);
+            }
+
+            resDiv.style.opacity = "1";
+            document.getElementById('monthly-gain').innerText = immediateGain.toLocaleString('ro-RO');
+            document.getElementById('fund-value').innerText = Math.round(wealth).toLocaleString('ro-RO');
+        }
+
+        // 2. LIVE COUNTER LOGIC
+        let supporters = 12483;
+        setInterval(() => {
+            // Creștere random pentru efectul de "mișcare"
+            if(Math.random() > 0.7) {
+                supporters++;
+                document.getElementById('supporterCounter').innerText = supporters.toLocaleString('ro-RO');
+            }
+        }, 3000);
+
+        // 3. POLL LOGIC
+        function submitPoll(e) {
+            e.preventDefault();
+            
+            // Preluăm județul
+            const county = document.getElementById('pollCounty').value;
+            if(!county) { alert("Te rugăm să alegi județul."); return; }
+
+            // Ascundem formularul, arătăm succesul
+            document.getElementById('pollForm').style.display = 'none';
+            const successMsg = document.getElementById('pollSuccess');
+            
+            // Simulăm un număr de ordine bazat pe județ (randomizat pt demo)
+            const randomRank = Math.floor(Math.random() * 5000) + 1000;
+            
+            document.getElementById('userCounty').innerText = county;
+            document.getElementById('userRank').innerText = randomRank;
+            
+            successMsg.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
