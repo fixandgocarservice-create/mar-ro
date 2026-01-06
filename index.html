@@ -19,29 +19,51 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--light-gray); color: var(--text-main); line-height: 1.6; scroll-behavior: smooth; }
 
-        /* --- LOGO FIXAT (PLUTITOR) --- */
-        /* Stilul este definit direct in HTML la imagine pentru a fi siguri ca merge */
-
         /* --- HEADER --- */
         header {
             background-color: var(--navy);
             color: var(--white);
-            padding: 1rem 2rem;
+            padding: 0.5rem 2rem;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
             display: flex;
-            justify-content: flex-end; /* Mutam meniul in dreapta pentru ca logo-ul e in stanga */
+            justify-content: space-between; /* Text stanga, Meniu dreapta */
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            height: 70px;
+            height: 80px;
+            padding-left: 90px; /* Lasa loc pentru sigla rotunda din stanga */
         }
 
-        nav ul { display: flex; gap: 20px; list-style: none; }
-        nav a { color: white; text-decoration: none; font-weight: 500; }
+        /* Stil pentru Numele Partidului */
+        .brand-name {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .brand-main { font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; }
+        .brand-main span { color: var(--gold); }
+        .brand-sub { font-size: 0.85rem; opacity: 0.8; font-weight: 400; }
+
+        /* Navigare */
+        nav ul { display: flex; gap: 20px; list-style: none; align-items: center; }
+        nav a { color: white; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s; }
         nav a:hover { color: var(--gold); }
+        
         .btn-nav { background: var(--gold); color: var(--navy); padding: 8px 16px; border-radius: 4px; font-weight: bold; }
+        
+        /* Buton special pentru APP */
+        .btn-app-link {
+            border: 1px solid var(--green);
+            color: var(--green) !important;
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-app-link:hover { background: var(--green); color: white !important; }
 
         /* --- HERO --- */
         .hero {
@@ -53,7 +75,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 100px 20px 50px;
+            padding: 120px 20px 50px;
         }
         .hero h1 { font-size: 3rem; margin-bottom: 20px; }
         .hero h1 span { color: var(--gold); }
@@ -66,6 +88,8 @@
             cursor: pointer;
             border: none;
             margin: 10px;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-primary { background-color: var(--green); color: white; }
         .btn-secondary { background: transparent; border: 2px solid white; color: white; }
@@ -74,16 +98,12 @@
         .section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
         .section-title { text-align: center; font-size: 2rem; color: var(--navy); margin-bottom: 40px; }
 
-        /* --- CARDURI DOCTRINA --- */
+        /* --- DOCTRINA & RESTUL --- */
         .doctrine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--navy); }
-
-        /* --- CALCULATOR --- */
         .calc-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .calc-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 5px; }
         .res-box { background: #f0fdf4; padding: 20px; border-left: 5px solid var(--green); margin-top: 20px; display: none; }
-
-        /* --- FORMULARE --- */
         .form-box { background: white; padding: 30px; border-radius: 10px; border: 1px solid #ddd; max-width: 600px; margin: 0 auto; }
         .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; }
         .radio-group { text-align: left; margin-bottom: 15px; }
@@ -91,21 +111,28 @@
 
         /* MOBILE */
         @media (max-width: 768px) {
+            header { padding-left: 80px; height: auto; py: 10px; flex-direction: column; align-items: flex-start; }
+            nav ul { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: center; width: 100%; }
+            .brand-sub { display: none; } /* Ascundem textul lung pe mobil */
             .hero h1 { font-size: 2rem; }
-            nav ul { display: none; } /* Meniu simplificat pe mobil */
+            .fixed-logo { width: 60px !important; top: 10px !important; left: 10px !important; }
         }
     </style>
 </head>
 <body>
 
-    <img src="logo.png" alt="Logo MAR" style="position: fixed; top: 15px; left: 15px; width: 70px !important; height: auto; z-index: 9999; border-radius: 50%; background: white; padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+    <img src="logo.png" class="fixed-logo" alt="Logo MAR" style="position: fixed; top: 15px; left: 15px; width: 70px !important; height: auto; z-index: 9999; border-radius: 50%; background: white; padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
 
     <header>
+        <div class="brand-name">
+            <div class="brand-main">MAR <span>.ro</span></div>
+            <div class="brand-sub">Mișcarea Acționarilor Români</div>
+        </div>
         <nav>
             <ul>
                 <li><a href="#viziune">Viziune</a></li>
                 <li><a href="#calculator">Simulator</a></li>
-                <li><a href="#sondaj">Sondaj</a></li>
+                <li><a href="app.html" target="_blank" class="btn-app-link">📱 App Demo</a></li>
                 <li><a href="#adeziune" class="btn-nav">Înscrie-te</a></li>
             </ul>
         </nav>
@@ -116,7 +143,7 @@
         <p>Primul partid care propune trecerea de la „Statul Stăpân” la „Statul Partener”.</p>
         <div>
             <button class="btn btn-primary" onclick="document.getElementById('calculator').scrollIntoView({behavior: 'smooth'})">Calculează Averea</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('adeziune').scrollIntoView({behavior: 'smooth'})">Vino în Echipa</button>
+            <a href="app.html" target="_blank" class="btn btn-secondary">Descarcă Aplicația</a>
         </div>
     </section>
 
@@ -170,9 +197,6 @@
 
                 <p style="font-weight: bold; margin-bottom: 10px;">2. Din ce județ ești?</p>
                 <input type="text" name="judet" class="form-input" placeholder="Ex: Brașov" required>
-
-                <p style="font-weight: bold; margin-bottom: 10px;">3. Mesajul tău pentru fondatori (opțional):</p>
-                <input type="text" name="mesaj" class="form-input" placeholder="...">
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Trimite Votul</button>
             </form>
