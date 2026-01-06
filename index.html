@@ -29,14 +29,14 @@
             top: 0;
             z-index: 1000;
             display: flex;
-            justify-content: space-between; /* Text stanga, Meniu dreapta */
+            justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             height: 80px;
             padding-left: 90px; /* Lasa loc pentru sigla rotunda din stanga */
         }
 
-        /* Stil pentru Numele Partidului */
+        /* Numele Partidului */
         .brand-name {
             display: flex;
             flex-direction: column;
@@ -53,7 +53,7 @@
         
         .btn-nav { background: var(--gold); color: var(--navy); padding: 8px 16px; border-radius: 4px; font-weight: bold; }
         
-        /* Buton special pentru APP */
+        /* Buton special APP */
         .btn-app-link {
             border: 1px solid var(--green);
             color: var(--green) !important;
@@ -98,7 +98,7 @@
         .section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
         .section-title { text-align: center; font-size: 2rem; color: var(--navy); margin-bottom: 40px; }
 
-        /* --- DOCTRINA & RESTUL --- */
+        /* --- ELEMENTE UI --- */
         .doctrine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--navy); }
         .calc-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -109,13 +109,12 @@
         .radio-group { text-align: left; margin-bottom: 15px; }
         .radio-label { display: block; margin-bottom: 5px; cursor: pointer; }
 
-        /* MOBILE */
+        /* MOBILE FIXES */
         @media (max-width: 768px) {
             header { padding-left: 80px; height: auto; py: 10px; flex-direction: column; align-items: flex-start; }
             nav ul { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: center; width: 100%; }
-            .brand-sub { display: none; } /* Ascundem textul lung pe mobil */
+            .brand-sub { display: none; } 
             .hero h1 { font-size: 2rem; }
-            .fixed-logo { width: 60px !important; top: 10px !important; left: 10px !important; }
         }
     </style>
 </head>
@@ -132,7 +131,9 @@
             <ul>
                 <li><a href="#viziune">Viziune</a></li>
                 <li><a href="#calculator">Simulator</a></li>
-                <li><a href="app.html" target="_blank" class="btn-app-link">📱 App Demo</a></li>
+                
+                <li><a href="app-mar.html" target="_blank" class="btn-app-link">📱 App Demo</a></li>
+                
                 <li><a href="#adeziune" class="btn-nav">Înscrie-te</a></li>
             </ul>
         </nav>
@@ -143,7 +144,9 @@
         <p>Primul partid care propune trecerea de la „Statul Stăpân” la „Statul Partener”.</p>
         <div>
             <button class="btn btn-primary" onclick="document.getElementById('calculator').scrollIntoView({behavior: 'smooth'})">Calculează Averea</button>
-            <a href="app.html" target="_blank" class="btn btn-secondary">Descarcă Aplicația</a>
+            
+            <a href="app-mar.html" target="_blank" class="btn btn-secondary">Descarcă Aplicația</a>
+        
         </div>
     </section>
 
@@ -197,6 +200,9 @@
 
                 <p style="font-weight: bold; margin-bottom: 10px;">2. Din ce județ ești?</p>
                 <input type="text" name="judet" class="form-input" placeholder="Ex: Brașov" required>
+
+                <p style="font-weight: bold; margin-bottom: 10px;">3. Mesajul tău (Opțional):</p>
+                <input type="text" name="mesaj" class="form-input" placeholder="...">
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Trimite Votul</button>
             </form>
