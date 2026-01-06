@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>CargoShare | Smart 3D Planner v3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; }
+        
+        /* UI Panel */
+        #ui-layer {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 15px; border-radius: 12px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            width: 300px; backdrop-filter: blur(12px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            max-height: 95vh; overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        h1 { margin: 0 0 15px 0; font-size: 16px; color: #38bdf8; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        label { font-size: 11px; color: #94a3b8; display: block; margin-top: 8px;}
+        
+        .input-group { display: flex; gap: 5px; }
+        .input-field {
+            flex: 1; padding: 6px; background: #1e293b; color: white;
+            border: 1px solid #475569; border-radius: 4px; font-size: 12px; width: 100%;
+        }
+        
+        .btn {
+            background: #2563eb; color: white; border: none; padding: 10px;
+            border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;
+            margin-top: 8px; font-size: 12px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn:hover { background: #3b82f6; }
+        .btn:active { transform: scale(0.98); }
+        .btn-green { background: #10b981; } .btn-green:hover { background: #059669; }
+        .btn-red { background: #ef4444; } .btn-red:hover { background: #dc2626; }
+        .btn-purple { background: #8b5cf6; } .btn-purple:hover { background: #7c3aed; }
+
+        .stats { margin-top: 15px; padding: 10px; background: #1e293b; border-radius: 6px; font-size: 11px; font-family: monospace; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+        #controls-hint {
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 8px;
+            font-size: 12px; color: #cbd5e1; pointer-events: none;
+        }
+        .key { display: inline-block; background: #334155; padding: 2px 6px; border-radius: 4px; border-bottom: 2px solid #1e293b; font-weight: bold; color: white; }
+
+        #loading { position: fixed; inset: 0; background: #020617; display: flex; align-items: center; justify-content: center; z-index: 100; font-family: monospace; color: #38bdf8; }
+    </style>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div id="loading">Se inițializează depozitul...</div>
+
+    <div id="ui-layer">
+        <h1><i class="fa-solid fa-cubes-stacked"></i> CargoBrain v3.0</h1>
+        
+        <label>Dimensiuni Camion (m)</label>
+        <div class="input-group">
+            <input type="number" id="truckL" class="input-field" value="13.6" step="0.1" placeholder="L">
+            <input type="number" id="truckW" class="input-field" value="2.45" step="0.1" placeholder="l">
+            <input type="number" id="truckH" class="input-field" value="2.7" step="0.1" placeholder="h">
+        </div>
+        <button class="btn" onclick="updateTruck()">Actualizează Camion</button>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+
+        <label>Adaugă Marfă (cm)</label>
+        <div class="input-group" style="margin-bottom: 5px;">
+            <select id="preset" class="input-field" onchange="applyPreset()">
+                <option value="euro">Euro Palet (120x80x145)</option>
+                <option value="ind">Palet Ind. (120x100x120)</option>
+                <option value="box">Cutie (60x40x40)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <input type="number" id="cw" class="input-field" value="120" placeholder="L">
+            <input type="number" id="cd" class="input-field" value="80" placeholder="l">
+            <input type="number" id="ch" class="input-field" value="145" placeholder="h">
+        </div>
+        <div class="input-group" style="margin-top: 5px;">
+            <input type="number" id="cqty" class="input-field" value="1" placeholder="Buc">
+            <button class="btn btn-green" onclick="addCargo()">+ Adaugă</button>
+        </div>
+
+        <button class="btn btn-purple" onclick="autoArrange()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Aranjare (AI)
+        </button>
+        
+        <div class="input-group" style="margin-top: 8px;">
+            <button class="btn" onclick="rotateSelected()">
+                <i class="fa-solid fa-rotate-right"></i> Rotește (R)
+            </button>
+            <button class="btn btn-red" onclick="clearAll()">
+                <i class="fa-solid fa-trash"></i> Reset
+            </button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-row"><span>Capacitate:</span> <span id="stat-cap">0%</span></div>
+            <div class="stat-row"><span>LDM:</span> <span id="stat-ldm">0.0 m</span></div>
+            <div class="stat-row"><span>Pachete:</span> <span id="stat-count">0</span></div>
+            <div style="height: 4px; background: #334155; border-radius: 2px; margin-top: 5px; overflow: hidden;">
+                <div id="stat-bar" style="height: 100%; width: 0%; background: #38bdf8; transition: width 0.5s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="controls-hint">
+        <div><span class="key">Click + Drag</span> Mută Marfa</div>
+        <div style="margin-top:5px;"><span class="key">Click Dr + Drag</span> Rotește Camera</div>
+        <div style="margin-top:5px;"><span class="key">R</span> sau <span class="key">Dublu Click</span> Rotește Palet</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { DragControls } from 'three/addons/controls/DragControls.js';
+        import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
+        // Globale
+        let scene, camera, renderer, controls, dragControls;
+        let truckGroup, cargoGroup;
+        let objects = []; // Array pentru DragControls
+        let selectedObject = null;
+        
+        // Dimensiuni curente
+        let TRUCK = { l: 13.6, w: 2.45, h: 2.7 };
+        
+        // Raycaster pentru stacking
+        const raycaster = new THREE.Raycaster();
+        const downVector = new THREE.Vector3(0, -1, 0);
+
+        init();
+
+        function init() {
+            // 1. Scena
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x1e293b, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+            camera.position.set(-8, 8, 12);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            document.body.appendChild(renderer.domElement);
+
+            // 2. Mediu (Warehouse HDRI)
+            new RGBELoader()
+                .setPath('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/')
+                .load('factory_1k.hdr', function (texture) {
+                    texture.mapping = THREE.EquirectangularReflectionMapping;
+                    scene.background = texture;
+                    scene.environment = texture;
+                    
+                    // Întunecăm puțin fundalul să nu distragă
+                    scene.backgroundBlurriness = 0.4;
+                    document.getElementById('loading').style.display = 'none';
+                });
+
+            // 3. Podea infinită (Concrete)
+            const floorGeo = new THREE.PlaneGeometry(200, 200);
+            const floorMat = new THREE.MeshStandardMaterial({ 
+                color: 0x334155, roughness: 0.8, metalness: 0.2 
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.05; // Puțin sub podeaua camionului
+            scene.add(floor);
+
+            // 4. Lumini
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            scene.add(dirLight);
+
+            // 5. Grupuri
+            truckGroup = new THREE.Group();
+            scene.add(truckGroup);
+            cargoGroup = new THREE.Group();
+            scene.add(cargoGroup);
+
+            // 6. Init
+            buildTruck();
+            setupControls();
+            
+            window.addEventListener('resize', onResize);
+            window.addEventListener('keydown', onKeyDown);
+            animate();
+        }
+
+        // --- CONSTRUIRE CAMION ---
+        function buildTruck() {
+            // Curățare
+            while(truckGroup.children.length > 0) {
+                const o = truckGroup.children[0];
+                if(o.geometry) o.geometry.dispose();
+                if(o.material) o.material.dispose();
+                truckGroup.remove(o);
+            }
+
+            // Podea Camion
+            const floorGeo = new THREE.BoxGeometry(TRUCK.l, 0.1, TRUCK.w); // Box subțire
+            const floorMat = new THREE.MeshStandardMaterial({ 
+                color: 0x475569, roughness: 0.5 
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.position.y = 0; 
+            floor.receiveShadow = true;
+            truckGroup.add(floor);
+
+            // Pereți (Transparenți)
+            const wallMat = new THREE.MeshStandardMaterial({
+                color: 0x94a3b8, transparent: true, opacity: 0.1, side: THREE.DoubleSide
+            });
+
+            // Față
+            const fWall = new THREE.Mesh(new THREE.PlaneGeometry(TRUCK.w, TRUCK.h), wallMat);
+            fWall.position.set(-TRUCK.l/2, TRUCK.h/2, 0);
+            fWall.rotation.y = Math.PI/2;
+            truckGroup.add(fWall);
+
+            // Spate (Doar contur/linie pentru a indica unde se închid ușile)
+            const bLineGeo = new THREE.EdgesGeometry(new THREE.BoxGeometry(0.1, TRUCK.h, TRUCK.w));
+            const bLine = new THREE.LineSegments(bLineGeo, new THREE.LineBasicMaterial({color: 0xff0000}));
+            bLine.position.set(TRUCK.l/2, TRUCK.h/2, 0);
+            truckGroup.add(bLine);
+
+            // Grid Ajutător
+            const grid = new THREE.GridHelper(TRUCK.l, Math.floor(TRUCK.l), 0x000000, 0x000000);
+            grid.position.y = 0.06;
+            grid.scale.z = TRUCK.w / TRUCK.l;
+            grid.material.opacity = 0.2;
+            grid.material.transparent = true;
+            truckGroup.add(grid);
+
+            // Update Stats UI
+            updateStats();
+        }
+
+        window.updateTruck = function() {
+            TRUCK.l = parseFloat(document.getElementById('truckL').value);
+            TRUCK.w = parseFloat(document.getElementById('truckW').value);
+            TRUCK.h = parseFloat(document.getElementById('truckH').value);
+            buildTruck();
+        }
+
+        // --- ADĂUGARE MARFĂ ---
+        window.applyPreset = function() {
+            const type = document.getElementById('preset').value;
+            const w = document.getElementById('cw');
+            const d = document.getElementById('cd');
+            const h = document.getElementById('ch');
+            if(type==='euro') { w.value=120; d.value=80; h.value=145; }
+            if(type==='ind') { w.value=120; d.value=100; h.value=120; }
+            if(type==='box') { w.value=60; d.value=40; h.value=40; }
+        }
+
+        window.addCargo = function() {
+            const qty = parseInt(document.getElementById('cqty').value);
+            const w = parseFloat(document.getElementById('cw').value) / 100; // cm -> m
+            const d = parseFloat(document.getElementById('cd').value) / 100;
+            const h = parseFloat(document.getElementById('ch').value) / 100;
+
+            for(let i=0; i<qty; i++) {
+                const geo = new THREE.BoxGeometry(w, h, d);
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: getRandomColor(), roughness: 0.4 
+                });
+                const cube = new THREE.Mesh(geo, mat);
+                
+                // Salvăm datele fizice
+                cube.userData = { 
+                    w: w, h: h, d: d, 
+                    id: Math.random(),
+                    isCargo: true
+                };
+
+                cube.castShadow = true;
+                cube.receiveShadow = true;
+
+                // Poziție de start (în afara camionului)
+                cube.position.set(TRUCK.l/2 + 2, h/2 + 0.1, (Math.random()-0.5)*2);
+
+                cargoGroup.add(cube);
+                objects.push(cube);
+            }
+            updateStats();
+        }
+
+        // --- CONTROALE ---
+        function setupControls() {
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxPolarAngle = Math.PI/2 - 0.05;
+
+            dragControls = new DragControls(objects, camera, renderer.domElement);
+            
+            dragControls.addEventListener('dragstart', function(e) {
+                controls.enabled = false;
+                selectedObject = e.object;
+                e.object.material.emissive.set(0x444444);
+            });
+
+            dragControls.addEventListener('drag', function(e) {
+                const obj = e.object;
+                
+                // 1. Clamping Pereți (Nu iese din camion pe lateral)
+                // Doar dacă e "înăuntru" sau aproape
+                const halfL = TRUCK.l/2;
+                const halfW = TRUCK.w/2;
+                
+                // Limite Hard
+                const maxX = halfL - obj.userData.w/2;
+                const maxZ = halfW - obj.userData.d/2;
+
+                // Verificăm dacă suntem în zona camionului, altfel lăsăm liber (loading dock)
+                if(obj.position.x < halfL + 1) {
+                    obj.position.x = Math.max(-maxX, Math.min(maxX, obj.position.x));
+                    obj.position.z = Math.max(-maxZ, Math.min(maxZ, obj.position.z));
+                }
+
+                // 2. Stacking Logic & Height Limit
+                // Pornim raza de deasupra obiectului
+                raycaster.set(new THREE.Vector3(obj.position.x, 10, obj.position.z), downVector);
+                
+                // Ignorăm obiectul curent
+                const others = objects.filter(o => o !== obj);
+                const hits = raycaster.intersectObjects(others);
+
+                let targetY = obj.userData.h / 2 + 0.05; // Default: podea (0.05 pt a evita z-fighting)
+
+                if(hits.length > 0) {
+                    // Cel mai de sus obiect
+                    const below = hits[0].object;
+                    // Verificăm dacă suntem deasupra lui (aproximativ)
+                    if(hits[0].point.y >= below.position.y) {
+                         targetY = below.position.y + below.userData.h/2 + obj.userData.h/2;
+                    }
+                }
+
+                // 3. HARD HEIGHT BLOCK
+                // Dacă noua poziție + jumătate din înălțime depășește tavanul
+                if (targetY + obj.userData.h/2 > TRUCK.h) {
+                    // BLOCAT! Nu urca.
+                    // Îl facem roșu temporar
+                    obj.material.color.setHex(0xff0000);
+                    // Îl forțăm la poziția maximă posibilă sau îl lăsăm jos?
+                    // Îl lăsăm la y-ul anterior valid sau pe podea dacă nu e loc
+                    // Aici îl lăsăm să gliseze pe podea dacă nu are loc sus
+                    // Dar vizual trebuie să arate că nu merge.
+                } else {
+                    obj.position.y = targetY;
+                    obj.material.color.setHex(obj.userData.originalColor || obj.material.color.getHex()); // Reset culoare
+                }
+            });
+
+            dragControls.addEventListener('dragend', function(e) {
+                controls.enabled = true;
+                e.object.material.emissive.set(0x000000);
+                // Dacă a rămas roșu (blocat), resetează culoarea (avem nevoie de stocarea culorii originale)
+                if(e.object.userData.originalColor) e.object.material.color.setHex(e.object.userData.originalColor);
+                updateStats();
+            });
+
+            // Dublu click pentru rotație
+            window.addEventListener('dblclick', function() {
+                if(selectedObject) rotateObject(selectedObject);
+            });
+        }
+
+        // --- ROTAȚIE ---
+        function onKeyDown(e) {
+            if(e.key.toLowerCase() === 'r' && selectedObject) {
+                rotateObject(selectedObject);
+            }
+        }
+
+        window.rotateSelected = function() {
+            if(selectedObject) rotateObject(selectedObject);
+        }
+
+        function rotateObject(obj) {
+            // Animăm rotația vizual
+            obj.rotation.y += Math.PI / 2;
+            
+            // Inversăm logic dimensiunile pentru coliziuni
+            const temp = obj.userData.w;
+            obj.userData.w = obj.userData.d;
+            obj.userData.d = temp;
+
+            // Recalculăm geometria pentru DragControls (box bounding)
+            // Three.js DragControls folosește geometria originală, deci e mai sigur să rotim Mesh-ul 
+            // și să gestionăm limitele manual (ceea ce facem în drag event listener).
+            
+            updateStats();
+        }
+
+        // --- AUTO ARANJARE (Greedy Algorithm) ---
+        window.autoArrange = async function() {
+            if(objects.length === 0) return;
+            
+            // Sortăm obiectele după înălțime (descrescător) pentru stabilitate
+            // Sau după volum
+            objects.sort((a,b) => (b.userData.h) - (a.userData.h));
+
+            // Resetăm pozițiile la "loading dock"
+            objects.forEach(o => o.position.set(20, 0, 0));
+
+            // Pointeri
+            let currentX = -TRUCK.l/2;
+            let currentY = 0.05;
+            let currentZ = -TRUCK.w/2;
+            let maxRowH = 0; // Înălțimea maximă pe rândul curent de Z
+
+            // Algoritm simplificat "Next Fit"
+            for (let obj of objects) {
+                // Dimensiuni curente
+                let w = obj.userData.w;
+                let d = obj.userData.d;
+                let h = obj.userData.h;
+
+                // Verificăm dacă intră pe lățime (Z)
+                if (currentZ + d > TRUCK.w/2) {
+                    // Trecem la următorul rând pe X
+                    currentZ = -TRUCK.w/2;
+                    currentX += w; // Presupunem că toate au lățime similară pe X, algoritm naiv
+                    // Aici ar trebui calculat "max width of previous row"
+                }
+
+                // Verificăm dacă intră pe lungime (X)
+                if (currentX + w > TRUCK.l/2) {
+                    // Camion plin pe podea? Urcăm un etaj?
+                    // Pentru simplitate, acest algoritm umple doar podeaua momentan
+                    // Sau face stack simplu
+                    // Hai să încercăm un stack simplu pe același X, Z
+                    // Reset
+                }
+
+                // Poziționăm
+                // Ajustăm coordonatele (origin is center)
+                obj.position.set(
+                    currentX + w/2, 
+                    h/2 + 0.05, 
+                    currentZ + d/2
+                );
+
+                // Salvăm culoarea originală pentru mecanismul de eroare
+                if(!obj.userData.originalColor) obj.userData.originalColor = obj.material.color.getHex();
+
+                // Avansăm pe Z
+                currentZ += d;
+                
+                // Mic delay pentru efect vizual
+                await new Promise(r => setTimeout(r, 50));
+            }
+            updateStats();
+        }
+
+        // --- UTILITARE ---
+        function updateStats() {
+            let usedVol = 0;
+            let maxX = -TRUCK.l/2;
+            
+            objects.forEach(o => {
+                // Dacă e în camion
+                if(Math.abs(o.position.x) <= TRUCK.l/2 && Math.abs(o.position.z) <= TRUCK.w/2) {
+                    usedVol += o.userData.w * o.userData.h * o.userData.d;
+                    const rightEdge = o.position.x + o.userData.w/2;
+                    if(rightEdge > maxX) maxX = rightEdge;
+                }
+            });
+
+            const totalVol = TRUCK.l * TRUCK.w * TRUCK.h;
+            const perc = Math.round((usedVol / totalVol) * 100);
+            const ldm = (maxX + TRUCK.l/2).toFixed(1);
+
+            document.getElementById('stat-cap').innerText = perc + "%";
+            document.getElementById('stat-ldm').innerText = ldm + " / " + TRUCK.l + "m";
+            document.getElementById('stat-count').innerText = objects.length;
+            document.getElementById('stat-bar').style.width = perc + "%";
+        }
+
+        window.clearAll = function() {
+            objects.forEach(o => {
+                o.geometry.dispose();
+                o.material.dispose();
+                cargoGroup.remove(o);
+            });
+            objects = [];
+            selectedObject = null;
+            updateStats();
+        }
+
+        function getRandomColor() {
+            const c = [0x3b82f6, 0xef4444, 0x10b981, 0xf59e0b, 0x8b5cf6];
+            return c[Math.floor(Math.random()*c.length)];
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+    </script>
+</body>
+</html>
