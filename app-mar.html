@@ -2,261 +2,415 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAR - Mișcarea Acționarilor Români</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MAR - App</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- STILURI GENERALE --- */
+        /* --- STILURI DE APLICAȚIE MOBILĂ --- */
         :root {
-            --navy: #0f172a;
-            --blue: #1e293b;
+            --bg-app: #f2f4f6;
+            --card-bg: #ffffff;
+            --primary: #0f172a; /* Navy */
+            --accent: #10b981;  /* Green */
             --gold: #d4af37;
-            --green: #10b981;
-            --white: #ffffff;
-            --light-gray: #f8fafc;
-            --text-main: #334155;
+            --text-dark: #1e293b;
+            --text-gray: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--light-gray); color: var(--text-main); line-height: 1.6; scroll-behavior: smooth; }
-
-        /* --- HEADER --- */
-        header {
-            background-color: var(--navy);
-            color: var(--white);
-            padding: 0.5rem 2rem;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            height: 80px;
-            padding-left: 90px; /* Lasa loc pentru sigla rotunda din stanga */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Numele Partidului */
-        .brand-name {
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-dark);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            line-height: 1.2;
+            overflow: hidden; /* Fără scroll pe body */
         }
-        .brand-main { font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; }
-        .brand-main span { color: var(--gold); }
-        .brand-sub { font-size: 0.85rem; opacity: 0.8; font-weight: 400; }
 
-        /* Navigare */
-        nav ul { display: flex; gap: 20px; list-style: none; align-items: center; }
-        nav a { color: white; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s; }
-        nav a:hover { color: var(--gold); }
-        
-        .btn-nav { background: var(--gold); color: var(--navy); padding: 8px 16px; border-radius: 4px; font-weight: bold; }
-        
-        /* Buton special APP */
-        .btn-app-link {
-            border: 1px solid var(--green);
-            color: var(--green) !important;
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .btn-app-link:hover { background: var(--green); color: white !important; }
-
-        /* --- HERO --- */
-        .hero {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
-            color: var(--white);
-            min-height: 100vh;
+        /* --- LOGIN SCREEN --- */
+        #login-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary);
+            color: white;
+            z-index: 100;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            padding: 120px 20px 50px;
+            padding: 20px;
+            transition: transform 0.4s ease-in-out;
         }
-        .hero h1 { font-size: 3rem; margin-bottom: 20px; }
-        .hero h1 span { color: var(--gold); }
-        
-        .btn {
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 5px;
+
+        .login-logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .login-logo span { color: var(--gold); }
+
+        .pin-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .pin-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
-            border: none;
-            margin: 10px;
-            text-decoration: none;
-            display: inline-block;
         }
-        .btn-primary { background-color: var(--green); color: white; }
-        .btn-secondary { background: transparent; border: 2px solid white; color: white; }
+        .pin-btn:active { background: rgba(255,255,255,0.3); }
 
-        /* --- SECTIUNI --- */
-        .section { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
-        .section-title { text-align: center; font-size: 2rem; color: var(--navy); margin-bottom: 40px; }
-
-        /* --- ELEMENTE UI --- */
-        .doctrine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--navy); }
-        .calc-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .calc-input { width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #ddd; border-radius: 5px; }
-        .res-box { background: #f0fdf4; padding: 20px; border-left: 5px solid var(--green); margin-top: 20px; display: none; }
-        .form-box { background: white; padding: 30px; border-radius: 10px; border: 1px solid #ddd; max-width: 600px; margin: 0 auto; }
-        .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; }
-        .radio-group { text-align: left; margin-bottom: 15px; }
-        .radio-label { display: block; margin-bottom: 5px; cursor: pointer; }
-
-        /* MOBILE FIXES */
-        @media (max-width: 768px) {
-            header { padding-left: 80px; height: auto; py: 10px; flex-direction: column; align-items: flex-start; }
-            nav ul { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: center; width: 100%; }
-            .brand-sub { display: none; } 
-            .hero h1 { font-size: 2rem; }
+        /* --- DASHBOARD --- */
+        #dashboard {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80px; /* Loc pentru meniu */
+            display: none; /* Ascuns initial */
         }
+
+        /* Header App */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-greeting h3 { margin: 0; font-size: 1.2rem; }
+        .user-greeting p { margin: 0; color: var(--text-gray); font-size: 0.9rem; }
+        
+        .notification-bell {
+            position: relative;
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .dot {
+            position: absolute; top: 5px; right: 5px;
+            width: 8px; height: 8px; background: red;
+            border-radius: 50%;
+        }
+
+        /* Card Principal (Banii) */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a8a 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-label { font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px; }
+        .balance-amount { font-size: 2.5rem; font-weight: 800; display: flex; align-items: baseline; }
+        .currency { font-size: 1.2rem; margin-left: 5px; color: var(--gold); }
+        
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(16, 185, 129, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #4ade80;
+            margin-top: 15px;
+        }
+        .pulse {
+            width: 8px; height: 8px; background: #4ade80;
+            border-radius: 50%; margin-right: 6px;
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        /* Resurse / Grid */
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .res-card {
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+        }
+        .res-icon { font-size: 1.5rem; margin-bottom: 10px; }
+        .res-name { font-size: 0.8rem; color: var(--text-gray); }
+        .res-val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+        .res-up { font-size: 0.75rem; color: var(--accent); margin-top: 5px; }
+
+        /* Grafic */
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            height: 250px;
+            margin-bottom: 20px;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #eee;
+            z-index: 50;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-gray); font-size: 0.7rem; gap: 5px;
+        }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; }
+
     </style>
 </head>
 <body>
 
-    <img src="logo.png" class="fixed-logo" alt="Logo MAR" style="position: fixed; top: 15px; left: 15px; width: 70px !important; height: auto; z-index: 9999; border-radius: 50%; background: white; padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-
-    <header>
-        <div class="brand-name">
-            <div class="brand-main">MAR <span>.ro</span></div>
-            <div class="brand-sub">Mișcarea Acționarilor Români</div>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="#viziune">Viziune</a></li>
-                <li><a href="#calculator">Simulator</a></li>
-                
-                <li><a href="app-mar.html" target="_blank" class="btn-app-link">📱 App Demo</a></li>
-                
-                <li><a href="#adeziune" class="btn-nav">Înscrie-te</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <section class="hero">
-        <h1>Nu ești doar contribuabil.<br><span>Ești Acționar.</span></h1>
-        <p>Primul partid care propune trecerea de la „Statul Stăpân” la „Statul Partener”.</p>
-        <div>
-            <button class="btn btn-primary" onclick="document.getElementById('calculator').scrollIntoView({behavior: 'smooth'})">Calculează Averea</button>
-            
-            <a href="app-mar.html" target="_blank" class="btn btn-secondary">Descarcă Aplicația</a>
+    <div id="login-screen">
+        <div class="login-logo">MAR<span>.app</span></div>
+        <p>Autentificare Securizată</p>
+        <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 5px;">Powered by Norwegian Audit</p>
         
+        <div class="pin-pad">
+            <div class="pin-btn" onclick="enterPin(1)">1</div>
+            <div class="pin-btn" onclick="enterPin(2)">2</div>
+            <div class="pin-btn" onclick="enterPin(3)">3</div>
+            <div class="pin-btn" onclick="enterPin(4)">4</div>
+            <div class="pin-btn" onclick="enterPin(5)">5</div>
+            <div class="pin-btn" onclick="enterPin(6)">6</div>
+            <div class="pin-btn" onclick="enterPin(7)">7</div>
+            <div class="pin-btn" onclick="enterPin(8)">8</div>
+            <div class="pin-btn" onclick="enterPin(9)">9</div>
+            <div class="pin-btn" style="opacity:0"></div>
+            <div class="pin-btn" onclick="enterPin(0)">0</div>
+            <div class="pin-btn" onclick="login()">➜</div>
         </div>
-    </section>
+        <p style="margin-top: 30px; font-size: 0.8rem;">Apasă ➜ pentru Demo</p>
+    </div>
 
-    <section id="viziune" class="section">
-        <h2 class="section-title">Pilonii MAR</h2>
-        <div class="doctrine-grid">
-            <div class="card">
-                <h3>🔐 Fondul Suveran</h3>
-                <p>Resursele naturale (Gaz, Aur) generează profit direct în conturile cetățenilor, garantate internațional.</p>
+    <div id="dashboard">
+        <div class="app-header">
+            <div class="user-greeting">
+                <p>Bun venit, Cetățean</p>
+                <h3>Ion Popescu</h3>
             </div>
-            <div class="card">
-                <h3>📉 Taxe Mici</h3>
-                <p>Digitalizarea ANAF aduce banii de la evazioniști, permițând scăderea taxelor pe munca ta.</p>
-            </div>
-            <div class="card">
-                <h3>🏛️ Stat Digital</h3>
-                <p>Fără dosare cu șină. Relația cu statul devine o simplă aplicație pe telefon.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="calculator" class="section">
-        <div class="calc-box">
-            <h2 class="section-title">Simulator Avere</h2>
-            <label>Salariul NET (Lei)</label>
-            <input type="number" id="salary" class="calc-input" placeholder="Ex: 4000">
-            <label>Vârsta (Ani)</label>
-            <input type="number" id="age" class="calc-input" placeholder="Ex: 35">
-            <button class="btn btn-primary" style="width: 100%" onclick="calculateMAR()">Calculează</button>
-
-            <div id="results" class="res-box">
-                <h3>Rezultatul Tău:</h3>
-                <p><strong>+ <span id="monthly-gain">0</span> Lei/lună</strong> (Câștig imediat prin reducerea taxelor)</p>
-                <p><strong>+ <span id="fund-value">0</span> Euro</strong> (În contul de avere la pensie)</p>
+            <div class="notification-bell">
+                🔔 <div class="dot"></div>
             </div>
         </div>
-    </section>
 
-    <section id="sondaj" class="section" style="background: white;">
-        <h2 class="section-title">Sondaj Național</h2>
-        <div class="form-box">
-            <form action="https://formspree.io/f/LINKUL_TAU_FORMSPREE" method="POST">
-                
-                <input type="hidden" name="_subject" value="Raspuns Nou Sondaj MAR">
-                
-                <p style="font-weight: bold; margin-bottom: 10px;">1. Susții crearea unui Fond Suveran administrat de Norvegia?</p>
-                <div class="radio-group">
-                    <label class="radio-label"><input type="radio" name="q1_fond" value="DA" required> DA, vreau garanții.</label>
-                    <label class="radio-label"><input type="radio" name="q1_fond" value="NU"> NU, am încredere în politicieni.</label>
+        <div class="balance-card">
+            <div class="balance-label">Averea Ta Totală (Acumulată)</div>
+            <div class="balance-amount">
+                <span id="main-balance">24.583,42</span>
+                <span class="currency">€</span>
+            </div>
+            <div class="live-indicator">
+                <div class="pulse"></div> Profit generat în timp real
+            </div>
+            <div style="position: absolute; right: 20px; bottom: 20px; opacity: 0.2; font-size: 3rem;">
+                🛡️
+            </div>
+        </div>
+
+        <div class="section-title">Surse de Venit (Azi)</div>
+        <div class="resources-grid">
+            <div class="res-card">
+                <div class="res-icon">⛽</div>
+                <div class="res-name">Gaz Neptun Deep</div>
+                <div class="res-val">+3,42 €</div>
+                <div class="res-up">▲ Productivitate Max</div>
+            </div>
+            <div class="res-card">
+                <div class="res-icon">⛏️</div>
+                <div class="res-name">Redevențe Aur</div>
+                <div class="res-val">+1,15 €</div>
+                <div class="res-up">▲ Preț global</div>
+            </div>
+            <div class="res-card">
+                <div class="res-icon">📈</div>
+                <div class="res-name">Investiții Norvegia</div>
+                <div class="res-val">+5,80 €</div>
+                <div class="res-up">▲ S&P 500</div>
+            </div>
+            <div class="res-card">
+                <div class="res-icon">⚖️</div>
+                <div class="res-name">Recuperare ANAF</div>
+                <div class="res-val">+2,10 €</div>
+                <div class="res-up">▲ Colectare</div>
+            </div>
+        </div>
+
+        <div class="section-title">Evoluția Contului Tău</div>
+        <div class="chart-container">
+            <canvas id="wealthChart"></canvas>
+        </div>
+
+        <div class="section-title">Jurnal de Transparență</div>
+        <div style="background: white; padding: 15px; border-radius: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <div>
+                    <div style="font-weight: bold; font-size: 0.9rem;">Dividend Apple Inc.</div>
+                    <div style="font-size: 0.75rem; color: gray;">Investiție Externă</div>
                 </div>
-
-                <p style="font-weight: bold; margin-bottom: 10px;">2. Din ce județ ești?</p>
-                <input type="text" name="judet" class="form-input" placeholder="Ex: Brașov" required>
-
-                <p style="font-weight: bold; margin-bottom: 10px;">3. Mesajul tău (Opțional):</p>
-                <input type="text" name="mesaj" class="form-input" placeholder="...">
-
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Trimite Votul</button>
-            </form>
+                <div style="color: var(--accent); font-weight: bold;">+0.45 €</div>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <div style="font-weight: bold; font-size: 0.9rem;">Vânzare Lot Gaz #402</div>
+                    <div style="font-size: 0.75rem; color: gray;">Marea Neagră</div>
+                </div>
+                <div style="color: var(--accent); font-weight: bold;">+1.20 €</div>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <section id="adeziune" class="section" style="background: var(--navy); color: white;">
-        <h2 class="section-title" style="color: white;">Membru Fondator</h2>
-        <div class="form-box" style="color: var(--text-main);">
-            
-            <form action="https://formspree.io/f/LINKUL_TAU_FORMSPREE" method="POST">
-                
-                <input type="hidden" name="_subject" value="CERERE ADEZIUNE NOUA">
-
-                <input type="text" name="nume" class="form-input" placeholder="Nume Complet" required>
-                <input type="email" name="email" class="form-input" placeholder="Emailul Tău" required>
-                <input type="tel" name="telefon" class="form-input" placeholder="Telefon" required>
-                
-                <label style="display: flex; align-items: start; gap: 10px; margin-bottom: 20px; font-size: 0.9rem;">
-                    <input type="checkbox" name="acord" required>
-                    Sunt de acord cu doctrina MAR și vreau să mă alătur mișcării.
-                </label>
-
-                <button type="submit" class="btn btn-primary" style="background: var(--gold); color: var(--navy); width: 100%;">Trimite Adeziunea</button>
-            </form>
+    <div class="bottom-nav" id="nav-bar" style="display: none;">
+        <div class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>Acasă</span>
         </div>
-    </section>
-
-    <footer style="background: #020617; color: #888; padding: 40px; text-align: center;">
-        <p>&copy; 2026 Mișcarea Acționarilor Români.</p>
-    </footer>
+        <div class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span>Portofoliu</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">🗳️</span>
+            <span>Vot</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Profil</span>
+        </div>
+    </div>
 
     <script>
-        function calculateMAR() {
-            const salary = parseFloat(document.getElementById('salary').value);
-            const age = parseInt(document.getElementById('age').value);
-            
-            if(!salary || !age) { alert("Introdu datele!"); return; }
+        // --- LOGICA APLICAȚIEI ---
 
-            const immediateGain = Math.round(salary * 0.17);
-            const years = 65 - age;
-            let wealth = 0;
-            
-            if (years > 0) {
-                const monthly = 60 + ((salary * 0.03) / 5); 
-                const rate = 0.06 / 12; 
-                wealth = monthly * ((Math.pow(1 + rate, years * 12) - 1) / rate);
-            }
+        // 1. Simulare Login
+        function enterPin(num) {
+            // Doar efect vizual, nu colectăm PIN
+        }
 
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('monthly-gain').innerText = immediateGain.toLocaleString('ro-RO');
-            document.getElementById('fund-value').innerText = Math.round(wealth).toLocaleString('ro-RO');
+        function login() {
+            const loginScreen = document.getElementById('login-screen');
+            const dashboard = document.getElementById('dashboard');
+            const navBar = document.getElementById('nav-bar');
+
+            // Animație de ieșire login
+            loginScreen.style.transform = 'translateY(-100%)';
+            
+            // Afișare dashboard
+            setTimeout(() => {
+                dashboard.style.display = 'block';
+                navBar.style.display = 'flex';
+                startMoneyCounter(); // Pornim "Banii Live"
+                renderChart();       // Desenăm graficul
+            }, 300);
+        }
+
+        // 2. Simulare Bani Live (The Hook)
+        let currentBalance = 24583.42;
+
+        function startMoneyCounter() {
+            const balanceElement = document.getElementById('main-balance');
+            
+            // La fiecare 2 secunde, mai intră "niște cenți" din economia globală
+            setInterval(() => {
+                // Adăugăm o sumă mică random (între 0.01 și 0.05 euro)
+                const increment = Math.random() * (0.05 - 0.01) + 0.01;
+                currentBalance += increment;
+                
+                // Formatăm numărul frumos (cu puncte și virgule)
+                balanceElement.innerText = currentBalance.toLocaleString('ro-RO', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                // Efect vizual subtil (flash verde)
+                balanceElement.style.color = '#10b981';
+                setTimeout(() => {
+                    balanceElement.style.color = 'white';
+                }, 300);
+
+            }, 2000);
+        }
+
+        // 3. Render Chart (Chart.js)
+        function renderChart() {
+            const ctx = document.getElementById('wealthChart').getContext('2d');
+            
+            // Gradient pentru grafic
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.5)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2026', '2027', '2028', '2029', '2030', '2031'],
+                    datasets: [{
+                        label: 'Proiecție Avere (€)',
+                        data: [24583, 28000, 33500, 41000, 49000, 58000],
+                        borderColor: '#10b981',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        fill: true,
+                        tension: 0.4 // Curbură lină
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { display: false }, // Ascundem axa Y pentru curățenie
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
         }
     </script>
-
 </body>
 </html>
